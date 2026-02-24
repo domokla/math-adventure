@@ -292,6 +292,7 @@
       scanned: false,
       scanning: false
     };
+    const defaultRewardImageCount = 13;
 
     startBtn.addEventListener("click", startPractice);
     answerForm.addEventListener("submit", handleSubmit);
@@ -452,7 +453,7 @@
       for (let i = 1; i <= maxIndex && missStreak < 40; i += 1) {
         let foundForIndex = false;
         for (const ext of exts) {
-          const url = `images/pic-${i}.${ext}`;
+          const url = resolveAssetUrl(`images/pic-${i}.${ext}`);
           const ok = await canLoadImage(url);
           if (ok) {
             found.push(url);
@@ -478,7 +479,9 @@
 
     function getRandomRewardImageUrl(animal) {
       if (rewardPool.urls.length === 0) {
-        return createFallbackRewardDataUri(animal);
+        // If scan is not finished yet, still try known local images first.
+        const candidate = randInt(1, defaultRewardImageCount);
+        return resolveAssetUrl(`images/pic-${candidate}.jpg`);
       }
       return rewardPool.urls[randInt(0, rewardPool.urls.length - 1)];
     }
@@ -488,9 +491,44 @@
       if (!rewardImage) return;
 
       rewardImage.onerror = () => {
-        rewardImage.onerror = null;
-        rewardImage.src = createFallbackRewardDataUri(animal);
+        const fallback = createFallbackRewardHtml(animal);
+        rewardImage.replaceWith(fallback);
       };
+    }
+
+    function createFallbackRewardHtml(animal) {
+      const isDolphin = animal === "dolphin";
+      const icon = isDolphin ? "🐬" : "🐧";
+      const title = isDolphin ? "Delfin jutalom" : "Pingvin jutalom";
+      const colorA = isDolphin ? "#9de7ff" : "#cde5ff";
+      const colorB = isDolphin ? "#d6fbff" : "#eef6ff";
+      const box = document.createElement("div");
+      box.className = "reward-image";
+      box.setAttribute("role", "img");
+      box.setAttribute("aria-label", title);
+      box.style.background = `linear-gradient(145deg, ${colorA}, ${colorB})`;
+      box.style.minHeight = "250px";
+      box.style.display = "grid";
+      box.style.placeItems = "center";
+      box.style.padding = "16px";
+      box.innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:5rem; line-height:1;">${icon}</div>
+          <div style="font-size:1.6rem; font-weight:900; margin-top:8px;">Szuper vagy!</div>
+        </div>
+      `;
+      return box;
+    }
+
+    function resolveAssetUrl(relativePath) {
+      const cleanPath = relativePath.replace(/^\/+/, "");
+      const { origin, pathname } = window.location;
+      const normalizedPath = pathname.endsWith(".html")
+        ? pathname.replace(/[^/]*$/, "")
+        : pathname.endsWith("/")
+          ? pathname
+          : `${pathname}/`;
+      return `${origin}${normalizedPath}${cleanPath}`;
     }
 
     function createFallbackRewardDataUri(animal) {
