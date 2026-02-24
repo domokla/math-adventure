@@ -403,11 +403,11 @@
 
       if (percent >= 95) {
         const animal = Math.random() < 0.5 ? "dolphin" : "penguin";
-        const imageUrl = getRandomRewardImageUrl();
+        const imageUrl = getRandomRewardImageUrl(animal);
 
         rewardBox.innerHTML = `
           <p class="big-msg">Szuper vagy! Fantasztikus teljesítmény!</p>
-          <img id="rewardImage" class="reward-image" src="${imageUrl || ""}" alt="Jutalom kép: ${animal}" />
+          <img id="rewardImage" class="reward-image" src="${imageUrl}" alt="Jutalom kép: ${animal}" />
           <p class="small">Ma nagyon ügyesen számoltál!</p>
         `;
         attachRewardFallback(animal);
@@ -476,8 +476,10 @@
       });
     }
 
-    function getRandomRewardImageUrl() {
-      if (rewardPool.urls.length === 0) return "";
+    function getRandomRewardImageUrl(animal) {
+      if (rewardPool.urls.length === 0) {
+        return createFallbackRewardDataUri(animal);
+      }
       return rewardPool.urls[randInt(0, rewardPool.urls.length - 1)];
     }
 
