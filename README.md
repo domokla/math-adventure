@@ -15,4 +15,4 @@ This is a simple web game to help kids practice addition and subtraction within 
 4. See your score and time, and enjoy the reward!
 
 ## License
-Images are from [Pexels](https://www.pexels.com/) and free to use.
+Images are from [Pexels](https://www.pexels.com/) and [Unsplash](https://unsplash.com/) and are free to use for personal and commercial purposes.
